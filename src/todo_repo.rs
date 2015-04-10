@@ -16,16 +16,16 @@ fn create_and_read_multiple_todos() {
     let todo_id_1 = repo.create(new_todo_1);
     let todo_id_2 = repo.create(new_todo_2);
 
-    let read_todo_1 = repo.find(todo_id_1);
-    let read_todo_2 = repo.find(todo_id_1);
+    let read_todo_1 = repo.find(todo_id_1.as_slice());
+    let read_todo_2 = repo.find(todo_id_1.as_slice());
 
     // ??? Why does this not compile?
     // error: cannot borrow `repo` as mutable because it is also borrowed as immutable
     //repo.create("blah");
 
     // Then
-    assert_eq!(read_todo_1, &new_todo_1);
-    assert_eq!(read_todo_2, &new_todo_2);
+    assert_eq!(read_todo_1.as_slice(), new_todo_1);
+    assert_eq!(read_todo_2.as_slice(), new_todo_2);
 }
 
 #[test]
@@ -48,18 +48,18 @@ fn find_should_find_an_existing_todo() {
     let todo = "existing todo";
 
     let mut repo = TodoRepo::new();
-    repo.store.insert(todo_key, todo);
+    repo.store.insert(String::from_str(todo_key), String::from_str(todo));
 
     // When
     let found_todo = repo.find(todo_key);
 
     // Then
-    assert_eq!(found_todo, &todo);
+    assert_eq!(found_todo, String::from_str(todo));
 }
 
 
 pub struct TodoRepo<'r> {
-    store: HashMap<&'r str, &'r str>
+    store: HashMap<String, String>
 }
 
 impl <'r> TodoRepo<'r> {
@@ -69,15 +69,15 @@ impl <'r> TodoRepo<'r> {
         }
     }
 
-    fn create(&mut self, todo: &'r str) -> &'r str {
+    fn create(&mut self, todo: &str) -> String {
         //let id = Uuid::new_v4().to_string().as_slice();
         let id = "dummy-id";
-        self.store.insert(id, todo);
-        id
+        self.store.insert(String::from_str(id), String::from_str(todo));
+        String::from_str(id)
     }
 
-    fn find(&'r self, id: &'r str) -> &'r &str {
-        self.store.find(&id).unwrap()
+    fn find(&'r self, id: &str) -> String {
+        self.store.find(&String::from_str(id)).unwrap()
     }
 }
 
